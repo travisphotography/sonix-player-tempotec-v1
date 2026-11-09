@@ -45,6 +45,7 @@ static lv_obj_t *mini_player_title;
 static lv_obj_t *mini_player_subtitle;
 static lv_timer_t *mini_player_timer;
 static gui_config_t *menu_cfg;
+static void main_menu_refresh_theme(void);
 static void main_menu_refresh_tiles(void);
 static void main_menu_style_mnml_tiles(void);
 
@@ -151,7 +152,7 @@ static void set_home_books(bool enabled) {
 	}
 	config_set_bool("ui", "home_books", enabled);
 	config_save();
-	main_menu_refresh_tiles();
+	main_menu_refresh_theme();
 }
 
 void main_menu_set_books(bool enabled) { set_home_books(enabled); }
@@ -263,6 +264,7 @@ static void main_menu_style_mnml_tiles(void) {
 	for (int i = 0; i < 6; i++) {
 		lv_obj_t *tile = lv_obj_get_child(menu_grid, i);
 		if (!tile) continue;
+		if (i == 3) lv_obj_set_hidden(tile, mnml && !main_menu_books());
 		uint32_t count = lv_obj_get_child_count(tile);
 		if (count < 2) continue;
 		lv_obj_t *label = lv_obj_get_child(tile, count - 1);
@@ -292,8 +294,8 @@ static void main_menu_style_mnml_tiles(void) {
 			lv_obj_set_style_shadow_width(tile, 0, 0);
 			lv_obj_set_width(label, lv_pct(100));
 			lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, 0);
-			lv_obj_set_style_text_font(label, &font_ui_24, 0);
-			lv_obj_set_height(label, lv_font_get_line_height(&font_ui_24));
+			lv_obj_set_style_text_font(label, &font_ui_28, 0);
+			lv_obj_set_height(label, lv_font_get_line_height(&font_ui_28));
 		} else {
 			for (uint32_t j = 0; j + 1 < count; j++)
 				lv_obj_remove_flag(lv_obj_get_child(tile, j), LV_OBJ_FLAG_HIDDEN);
@@ -494,7 +496,7 @@ static void main_menu_refresh_theme(void) {
 		lv_obj_set_hidden(home_note, true);
 		lv_obj_set_hidden(mini_player, true);
 		gridpage_set_layout(menu_grid, menu_cfg, menu_cfg->top_bar_height, 0,
-		                    menu_cfg->padding, 0, 1, 6);
+		                    menu_cfg->padding, 0, 1, main_menu_books() ? 6 : 5);
 		main_menu_refresh_tiles();
 	} else if (prototype_layout) {
 		lv_obj_set_hidden(home_header, !home_header_shown());

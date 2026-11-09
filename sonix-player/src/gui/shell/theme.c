@@ -262,6 +262,18 @@ static const lv_color_t ACCENT_COLORS[THEME_ACCENT_COUNT] = {
 	LV_COLOR_MAKE(213, 97, 153),  // pink (#d56199)
 	LV_COLOR_MAKE(168, 101, 48),  // brown (#a86530)
 	LV_COLOR_MAKE(139, 142, 148), // slate (#8b8e94)
+	LV_COLOR_MAKE(100, 81, 138),  // muted violet (#64518a)
+	LV_COLOR_MAKE(70, 128, 120),  // deep teal (#468078)
+	LV_COLOR_MAKE(77, 111, 140),  // steel blue (#4d6f8c)
+	LV_COLOR_MAKE(91, 143, 111),  // sage (#5b8f6f)
+	LV_COLOR_MAKE(169, 119, 110), // dusty rose (#a9776e)
+	LV_COLOR_MAKE(148, 124, 75),  // old gold (#947c4b)
+	LV_COLOR_MAKE(81, 109, 96),   // forest slate (#516d60)
+	LV_COLOR_MAKE(108, 95, 124),  // plum grey (#6c5f7c)
+	LV_COLOR_MAKE(90, 124, 140),  // blue-grey (#5a7c8c)
+	LV_COLOR_MAKE(143, 114, 138), // mauve (#8f728a)
+	LV_COLOR_MAKE(150, 113, 79),  // clay brown (#96714f)
+	LV_COLOR_MAKE(115, 132, 127), // mineral grey (#73847f)
 };
 static int accent_index;
 

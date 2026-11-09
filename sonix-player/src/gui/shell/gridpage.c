@@ -34,6 +34,10 @@ static int grid_gap(void) { return compact_grid() ? 6 : GRID_GAP; }
 #define GRIDPAGE_THEME_TILE_MAX 16
 typedef struct {
 	lv_obj_t *grid;
+	gui_config_t *cfg;
+	int columns;
+	int rows;
+	int top;
 	int count;
 	const lv_image_dsc_t *normal_icons[GRIDPAGE_THEME_TILE_MAX];
 	const char *labels[GRIDPAGE_THEME_TILE_MAX];
@@ -44,6 +48,7 @@ static int theme_page_count;
 static bool theme_refresh_registered;
 
 static void gridpage_apply_theme_page(gridpage_theme_page_t *page);
+static void gridpage_layout_theme_page(gridpage_theme_page_t *page);
 static gridpage_theme_page_t *gridpage_theme_page_for(lv_obj_t *grid);
 
 static void unavailable_cb(lv_event_t *e) {
@@ -278,7 +283,9 @@ static void gridpage_apply_theme_page(gridpage_theme_page_t *page) {
 	}
 
 	bool tokyo = theme_uses_function_glyphs();
+	bool mnml = compact_grid() && theme_get_kind() == THEME_KIND_MNML;
 	bool horizontal = tokyo && compact_grid();
+	gridpage_layout_theme_page(page);
 	for (int i = 0; i < page->count; i++) {
 		const lv_image_dsc_t *icon = page->normal_icons[i];
 		theme_semantic_t tone = THEME_SEMANTIC_BLUE;
@@ -292,11 +299,54 @@ static void gridpage_apply_theme_page(gridpage_theme_page_t *page) {
 
 		lv_obj_t *tile = lv_obj_get_child(page->grid, i);
 		if (tile) {
+			lv_obj_t *glyph = tile_icon_object(tile);
+			lv_obj_t *label = tile_label_object(tile);
+			if (glyph) lv_obj_set_hidden(glyph, mnml);
+			if (tile_has_icon_halo(tile)) lv_obj_set_hidden(lv_obj_get_child(tile, 0), mnml);
+			if (label && page->labels[i]) {
+				const char *src = tr(page->labels[i]);
+				if (mnml) {
+					char lower[128];
+					size_t n = strlen(src);
+					if (n >= sizeof lower) n = sizeof lower - 1;
+					for (size_t j = 0; j < n; j++) {
+						unsigned char c = (unsigned char)src[j];
+						lower[j] = (c >= 'A' && c <= 'Z') ? (char)(c + ('a' - 'A')) : (char)c;
+					}
+					lower[n] = '\0';
+					lv_label_set_text(label, lower);
+					lv_obj_set_style_text_font(label, &font_ui_26, 0);
+					lv_obj_set_height(label, lv_font_get_line_height(&font_ui_26));
+					lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, 0);
+				} else {
+					lv_label_set_text(label, src);
+					const lv_font_t *font = compact_grid() ? bp_tile_label_font() : &font_ui_24_bold;
+					lv_obj_set_style_text_font(label, font, 0);
+					lv_obj_set_height(label, lv_font_get_line_height(font));
+				}
+			}
+			if (mnml) {
+				lv_obj_set_flex_flow(tile, LV_FLEX_FLOW_ROW);
+				lv_obj_set_flex_align(tile, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+				lv_obj_set_style_pad_all(tile, 0, 0);
+				lv_obj_set_style_pad_left(tile, 12, 0);
+				lv_obj_set_style_pad_gap(tile, 0, 0);
+				lv_obj_set_style_bg_opa(tile, LV_OPA_TRANSP, 0);
+				lv_obj_set_style_radius(tile, 0, 0);
+				lv_obj_set_style_shadow_width(tile, 0, 0);
+				lv_obj_set_style_outline_width(tile, 0, 0);
+			} else {
+				lv_obj_remove_local_style_prop(tile, LV_STYLE_BG_OPA, 0);
+				lv_obj_remove_local_style_prop(tile, LV_STYLE_PAD_LEFT, 0);
+				lv_obj_remove_local_style_prop(tile, LV_STYLE_RADIUS, 0);
+				lv_obj_remove_local_style_prop(tile, LV_STYLE_SHADOW_WIDTH, 0);
+				gridpage_set_tile_orientation(page->grid, i, horizontal);
+			}
 			// Tokyo Night tiles are separated by gaps and fill, not keylines.
 			// Clear both border and focus-outline styles; a zero-opacity line
 			// still reads as a card edge on the V1's small panel.
 			lv_obj_set_style_border_width(tile, 0, 0);
-			if (tokyo) {
+			if (tokyo || mnml) {
 				lv_obj_set_style_outline_width(tile, 0, 0);
 			} else {
 				lv_obj_remove_local_style_prop(tile, LV_STYLE_OUTLINE_WIDTH, 0);
@@ -320,7 +370,7 @@ static gridpage_theme_page_t *gridpage_theme_page_for(lv_obj_t *grid) {
 	return NULL;
 }
 
-static void gridpage_register_theme_page(lv_obj_t *grid, const grid_entry_t *entries, int count) {
+static void gridpage_register_theme_page(lv_obj_t *grid, gui_config_t *cfg, const grid_entry_t *entries, int count, int columns, int rows, int top) {
 	if (!grid || !entries || count < 0 || count > GRIDPAGE_THEME_TILE_MAX) {
 		return;
 	}
@@ -333,6 +383,10 @@ static void gridpage_register_theme_page(lv_obj_t *grid, const grid_entry_t *ent
 		page = &theme_pages[theme_page_count++];
 		page->grid = grid;
 	}
+	page->cfg = cfg;
+	page->columns = columns;
+	page->rows = rows;
+	page->top = top;
 	page->count = count;
 	for (int i = 0; i < count; i++) {
 		page->normal_icons[i] = entries[i].icon;
@@ -477,6 +531,18 @@ void gridpage_set_layout(lv_obj_t *grid, gui_config_t *cfg, int top, int bottom,
 	}
 }
 
+static void gridpage_layout_theme_page(gridpage_theme_page_t *page) {
+	if (!page || !page->grid || !page->cfg) return;
+	bool mnml = compact_grid() && theme_get_kind() == THEME_KIND_MNML;
+	int rows = mnml ? LV_MIN(page->count, 6) : page->rows;
+	int columns = mnml ? 1 : page->columns;
+	int gap = mnml ? 0 : grid_gap();
+	if (rows < 1) rows = 1;
+	gridpage_set_layout(page->grid, page->cfg, page->top, 0, page->cfg->padding, gap, columns, rows);
+	lv_obj_set_scrollable(page->grid, mnml && page->count > rows);
+	if (mnml && page->count > rows) lv_obj_set_scroll_dir(page->grid, LV_DIR_VER);
+}
+
 static void add_tile(lv_obj_t *grid, const grid_entry_t *entry, int width, int height) {
 	const bool compact = compact_grid();
 	lv_obj_t *tile = lv_btn_create(grid);
@@ -594,7 +660,7 @@ lv_obj_t *gridpage_build(lv_obj_t *screen, gui_config_t *cfg, const grid_entry_t
 	// Handed back for the same reason: a caller that wants a gesture of its own
 	// on the page has to put it on this object, because nothing below it
 	// bubbles any further.
-	gridpage_register_theme_page(grid, entries, count);
+	gridpage_register_theme_page(grid, cfg, entries, count, columns, rows, top);
 	return grid;
 }
 
@@ -624,7 +690,7 @@ void gridpage_replace_entries(lv_obj_t *grid, gui_config_t *cfg, const grid_entr
 	for (int i = 0; i < count; i++) {
 		add_tile(grid, &entries[i], lone_last_tile(count, columns, rows, i) ? usable_w : tile_w, tile_h);
 	}
-	gridpage_register_theme_page(grid, entries, count);
+	gridpage_register_theme_page(grid, cfg, entries, count, columns, rows, top);
 	lv_obj_update_layout(grid);
 }
 

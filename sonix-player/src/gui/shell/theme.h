@@ -187,7 +187,7 @@ void theme_toggle(void);
 // Amber on Black to amber (#ffad2e), OLED to white (#ffffff), and all three
 // honor any explicitly selected non-default accent.
 // Persists in the config.
-#define THEME_ACCENT_COUNT 12
+#define THEME_ACCENT_COUNT 24
 lv_color_t theme_accent_preset(int index);
 int theme_get_accent(void);
 void theme_set_accent(int index);
