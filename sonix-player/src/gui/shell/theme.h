@@ -15,9 +15,10 @@ typedef enum {
 	THEME_KIND_AMBER_ON_BLACK = 3,
 	THEME_KIND_OLED = 4,
 	THEME_KIND_CUSTOM = 5,
+	THEME_KIND_MNML = 6,
 } theme_kind_t;
 
-#define THEME_KIND_COUNT 5 // built-in themes; Custom is a separate SD-card choice
+#define THEME_KIND_COUNT 7 // built-in themes; Custom is a separate SD-card choice
 
 // Fixed semantic accents used by Tokyo Night's function-matched glyphs.
 // Amber on Black and OLED map every icon role to their accent (signal amber,

@@ -106,6 +106,19 @@ static theme_palette_t palette_oled = {
 	.dark = true,
 };
 
+// MNML: pure black, minimalist typography, user-selectable accent.
+static theme_palette_t palette_mnml = {
+    .screen_bg = LV_COLOR_MAKE(0, 0, 0),
+    .surface = LV_COLOR_MAKE(0, 0, 0),
+    .surface_pressed = LV_COLOR_MAKE(24, 24, 24),
+    .panel = LV_COLOR_MAKE(0, 0, 0),
+    .cover_bg = LV_COLOR_MAKE(0, 0, 0),
+    .text_primary = LV_COLOR_MAKE(255, 255, 255),
+    .text_secondary = LV_COLOR_MAKE(160, 160, 160),
+    .accent = LV_COLOR_MAKE(53, 132, 228),
+    .dark = true,
+};
+
 // A fixed filename keeps the card interface simple and avoids user-supplied
 // paths. Parsing is transactional: a partial or malformed edit is never shown.
 static char custom_root[512];
@@ -212,6 +225,8 @@ static theme_palette_t *selected_palette(void) {
 		return &palette_oled;
 	case THEME_KIND_CUSTOM:
 		return &palette_custom;
+	case THEME_KIND_MNML:
+		return &palette_mnml;
 	case THEME_KIND_DARK:
 	default:
 		return &palette_dark;
@@ -258,6 +273,8 @@ static lv_color_t default_accent(theme_kind_t kind) {
 		return lv_color_make(255, 173, 46); // Amber on Black signal
 	case THEME_KIND_OLED:
 		return lv_color_make(255, 255, 255); // OLED white
+	case THEME_KIND_MNML:
+		return lv_color_make(53, 132, 228); // MNML default blue
 	case THEME_KIND_CUSTOM:
 		return custom_accent;
 	case THEME_KIND_DARK:
@@ -520,6 +537,8 @@ void theme_init(void) {
 		selected_kind = THEME_KIND_AMBER_ON_BLACK;
 	} else if (saved_theme && strcmp(saved_theme, "oled") == 0) {
 		selected_kind = THEME_KIND_OLED;
+	} else if (saved_theme && strcmp(saved_theme, "mnml") == 0) {
+		selected_kind = THEME_KIND_MNML;
 	} else if (saved_theme && strcmp(saved_theme, "custom") == 0) {
 		selected_kind = load_custom(&palette_custom) ? THEME_KIND_CUSTOM : THEME_KIND_DARK;
 		if (selected_kind == THEME_KIND_CUSTOM) custom_accent = palette_custom.accent;
@@ -561,6 +580,7 @@ void theme_init(void) {
 	palette_tokyo.accent = accent_index == 0 ? default_accent(THEME_KIND_TOKYO_NIGHT) : ACCENT_COLORS[accent_index];
 	palette_amber.accent = accent_index == 0 ? default_accent(THEME_KIND_AMBER_ON_BLACK) : ACCENT_COLORS[accent_index];
 	palette_oled.accent = accent_index == 0 ? default_accent(THEME_KIND_OLED) : ACCENT_COLORS[accent_index];
+	palette_mnml.accent = accent_index == 0 ? default_accent(THEME_KIND_MNML) : ACCENT_COLORS[accent_index];
 	palette_custom.accent = accent_index == 0 ? custom_accent : ACCENT_COLORS[accent_index];
 
 	dynamic_tint = config_get_bool("ui", "dynamic_tint", false);
@@ -881,6 +901,8 @@ static const char *theme_config_value(theme_kind_t kind) {
 		return "oled";
 	case THEME_KIND_CUSTOM:
 		return "custom";
+	case THEME_KIND_MNML:
+		return "mnml";
 	case THEME_KIND_DARK:
 	default:
 		return "dark";
@@ -902,7 +924,7 @@ bool theme_reload_custom(void) {
 }
 
 void theme_set_kind(theme_kind_t kind) {
-	if (kind < THEME_KIND_DARK || kind > THEME_KIND_CUSTOM) {
+	if (kind < THEME_KIND_DARK || kind >= THEME_KIND_COUNT) {
 		return;
 	}
 	if (kind == THEME_KIND_CUSTOM && !theme_reload_custom()) {
@@ -916,6 +938,7 @@ void theme_set_kind(theme_kind_t kind) {
 	palette_tokyo.accent = accent_index == 0 ? default_accent(THEME_KIND_TOKYO_NIGHT) : ACCENT_COLORS[accent_index];
 	palette_amber.accent = accent_index == 0 ? default_accent(THEME_KIND_AMBER_ON_BLACK) : ACCENT_COLORS[accent_index];
 	palette_oled.accent = accent_index == 0 ? default_accent(THEME_KIND_OLED) : ACCENT_COLORS[accent_index];
+	palette_mnml.accent = accent_index == 0 ? default_accent(THEME_KIND_MNML) : ACCENT_COLORS[accent_index];
 	palette_custom.accent = accent_index == 0 ? custom_accent : ACCENT_COLORS[accent_index];
 	rebuild_active();
 	apply_palette();
@@ -944,6 +967,7 @@ void theme_set_accent(int index) {
 	palette_tokyo.accent = index == 0 ? default_accent(THEME_KIND_TOKYO_NIGHT) : ACCENT_COLORS[index];
 	palette_amber.accent = index == 0 ? default_accent(THEME_KIND_AMBER_ON_BLACK) : ACCENT_COLORS[index];
 	palette_oled.accent = index == 0 ? default_accent(THEME_KIND_OLED) : ACCENT_COLORS[index];
+	palette_mnml.accent = index == 0 ? default_accent(THEME_KIND_MNML) : ACCENT_COLORS[index];
 	rebuild_active(); // the tint is drawn from the accent, so it moves with it
 	apply_palette();
 

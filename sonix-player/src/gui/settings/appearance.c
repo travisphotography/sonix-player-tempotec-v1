@@ -27,7 +27,7 @@
 
 lv_obj_t *appearance_screen;
 
-static lv_obj_t *theme_buttons[THEME_KIND_CUSTOM + 1];
+static lv_obj_t *theme_buttons[THEME_KIND_COUNT];
 static lv_obj_t *btn_boot[5];		 // Stock / Retrospace / Space / Travelling in space / Custom
 static lv_obj_t *boot_picture_value; // the name of the custom picture, on its row
 static lv_obj_t *btn_clock[4]; // left / centre / right / hidden
@@ -230,7 +230,7 @@ static void font_pills_reload_cb(lv_event_t *e) {
 // outlined selected pill that suits their compact V1 appearance card.
 static void refresh_buttons(void) {
 	theme_kind_t active_kind = theme_get_kind();
-	for (int i = 0; i <= THEME_KIND_CUSTOM; i++) {
+	for (int i = 0; i < THEME_KIND_COUNT; i++) {
 		lv_obj_t *button = theme_buttons[i];
 		if (!button) {
 			continue;
@@ -675,6 +675,7 @@ void appearance_init(gui_config_t *cfg) {
 		compact ? "appearance_amber_short" : "appearance_amber_on_black", THEME_KIND_AMBER_ON_BLACK, compact);
 	theme_buttons[THEME_KIND_OLED] = make_theme_choice(row, "appearance_oled", THEME_KIND_OLED, compact);
 	theme_buttons[THEME_KIND_CUSTOM] = make_theme_choice(row, "appearance_custom", THEME_KIND_CUSTOM, compact);
+	theme_buttons[THEME_KIND_MNML] = make_theme_choice(row, "MNML", THEME_KIND_MNML, compact);
 	lv_obj_t *custom_note = lv_label_create(container);
 	lv_label_set_long_mode(custom_note, LV_LABEL_LONG_WRAP);
 	lv_obj_set_width(custom_note, lv_pct(100));

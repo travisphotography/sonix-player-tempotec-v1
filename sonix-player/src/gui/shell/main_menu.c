@@ -46,6 +46,7 @@ static lv_obj_t *mini_player_subtitle;
 static lv_timer_t *mini_player_timer;
 static gui_config_t *menu_cfg;
 static void main_menu_refresh_tiles(void);
+static void main_menu_style_mnml_tiles(void);
 
 // lv_btn supplies state-specific focus and shadow styles. Those do not inherit
 // the zero-width default style below, and on the compact footer their bottom
@@ -231,7 +232,7 @@ static void main_menu_refresh_tiles(void) {
 				source = native;
 			}
 		}
-		gridpage_set_tile_label_hidden(menu_grid, i, icons_only);
+		gridpage_set_tile_label_hidden(menu_grid, i, icons_only && theme_get_kind() != THEME_KIND_MNML);
 		if (tokyo) {
 			// Keep the decorative left-column glow only in the labeled layout.
 			bool glow = !icons_only && compact && (i % 2 == 0);
@@ -250,6 +251,66 @@ static void main_menu_refresh_tiles(void) {
 			lv_obj_remove_local_style_prop(tile, LV_STYLE_OUTLINE_WIDTH, 0);
 		}
 	}
+	main_menu_style_mnml_tiles();
+}
+
+// MNML changes only the V1 home grid, never the shared submenu tiles.
+// Each original tile keeps its click handler and full-row touch target.
+static void main_menu_style_mnml_tiles(void) {
+	if (!menu_grid) return;
+	bool mnml = bp_is_tempotec_v1() && theme_get_kind() == THEME_KIND_MNML;
+	static const char *keys[6] = {"music", "streaming", "wireless", "audiobooks", "more", "settings"};
+	for (int i = 0; i < 6; i++) {
+		lv_obj_t *tile = lv_obj_get_child(menu_grid, i);
+		if (!tile) continue;
+		uint32_t count = lv_obj_get_child_count(tile);
+		if (count < 2) continue;
+		lv_obj_t *label = lv_obj_get_child(tile, count - 1);
+		if (mnml) {
+			const char *src = lv_label_get_text(label);
+			char lower[128];
+			size_t n = strlen(src);
+			if (n >= sizeof(lower)) n = sizeof(lower) - 1;
+			for (size_t j = 0; j < n; j++) {
+				unsigned char c = (unsigned char)src[j];
+				lower[j] = (c >= 'A' && c <= 'Z') ? (char)(c + ('a' - 'A')) : (char)c;
+			}
+			lower[n] = '\0';
+			lv_label_set_text(label, lower);
+			for (uint32_t j = 0; j + 1 < count; j++)
+				lv_obj_add_flag(lv_obj_get_child(tile, j), LV_OBJ_FLAG_HIDDEN);
+			lv_obj_set_hidden(label, false);
+			lv_obj_set_flex_flow(tile, LV_FLEX_FLOW_ROW);
+			lv_obj_set_flex_align(tile, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			lv_obj_set_style_pad_all(tile, 0, 0);
+			lv_obj_set_style_pad_left(tile, 12, 0);
+			lv_obj_set_style_pad_gap(tile, 0, 0);
+			lv_obj_set_style_bg_opa(tile, LV_OPA_TRANSP, 0);
+			lv_obj_set_style_radius(tile, 0, 0);
+			lv_obj_set_style_border_width(tile, 0, 0);
+			lv_obj_set_style_outline_width(tile, 0, 0);
+			lv_obj_set_style_shadow_width(tile, 0, 0);
+			lv_obj_set_width(label, lv_pct(100));
+			lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, 0);
+			lv_obj_set_style_text_font(label, &font_ui_24, 0);
+			lv_obj_set_height(label, lv_font_get_line_height(&font_ui_24));
+		} else {
+			for (uint32_t j = 0; j + 1 < count; j++)
+				lv_obj_remove_flag(lv_obj_get_child(tile, j), LV_OBJ_FLAG_HIDDEN);
+			const char *key = i == 0 ? (main_menu_browse() ? "music_browse" : "music") :
+			                  i == 3 ? (main_menu_books() ? "books" : "audiobooks") : keys[i];
+			lv_label_set_text(label, tr(key));
+			lv_obj_set_hidden(label, main_menu_icons_only());
+			lv_obj_remove_local_style_prop(tile, LV_STYLE_BG_OPA, 0);
+			lv_obj_remove_local_style_prop(tile, LV_STYLE_PAD_LEFT, 0);
+			lv_obj_remove_local_style_prop(tile, LV_STYLE_RADIUS, 0);
+			lv_obj_remove_local_style_prop(tile, LV_STYLE_SHADOW_WIDTH, 0);
+			lv_obj_set_style_text_font(label, bp_tile_label_font(), 0);
+			lv_obj_set_height(label, lv_font_get_line_height(bp_tile_label_font()));
+			gridpage_set_tile_orientation(menu_grid, i,
+			        bp_is_tempotec_v1() && theme_uses_function_glyphs() && !main_menu_icons_only());
+		}
+	}
 }
 
 // Fit the V1's live strip around two fixed one-line labels. Explicitly sizing
@@ -257,7 +318,8 @@ static void main_menu_refresh_tiles(void) {
 // inside the card, including after a font-size or theme change.
 static void main_menu_layout_tokyo_home(bool force) {
 	if (!menu_grid || !menu_cfg || !mini_player || !mini_player_copy ||
-			!bp_is_tempotec_v1() || !theme_uses_function_glyphs()) {
+			!bp_is_tempotec_v1() ||
+            !theme_uses_function_glyphs()) {
 		return;
 	}
 
@@ -285,7 +347,9 @@ static void main_menu_layout_tokyo_home(bool force) {
 
 	int bottom = (int)menu_cfg->padding + footer_height + 1;
 	int top = (int)menu_cfg->top_bar_height + (home_header_shown() ? HOME_HEADER_HEIGHT : 0);
-	gridpage_set_layout(menu_grid, menu_cfg, top, bottom, menu_cfg->padding, 6, 2, 3);
+	gridpage_set_layout(menu_grid, menu_cfg, top, bottom,
+                        menu_cfg->padding, 6,
+                        2, 3);
 	main_menu_refresh_tiles();
 }
 
@@ -423,8 +487,16 @@ static void main_menu_refresh_theme(void) {
 	bool compact = bp_is_tempotec_v1();
 	bool tokyo = theme_uses_function_glyphs();
 	bool prototype_layout = compact && tokyo;
+	bool mnml = compact && theme_get_kind() == THEME_KIND_MNML;
 
-	if (prototype_layout) {
+	if (mnml) {
+		lv_obj_set_hidden(home_header, true);
+		lv_obj_set_hidden(home_note, true);
+		lv_obj_set_hidden(mini_player, true);
+		gridpage_set_layout(menu_grid, menu_cfg, menu_cfg->top_bar_height, 0,
+		                    menu_cfg->padding, 0, 1, 6);
+		main_menu_refresh_tiles();
+	} else if (prototype_layout) {
 		lv_obj_set_hidden(home_header, !home_header_shown());
 		lv_obj_set_hidden(home_note, !home_header_shown());
 		lv_obj_set_hidden(mini_player, false);
