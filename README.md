@@ -1,3 +1,62 @@
+# MNML — Minimalist UI for Sonix Player
+
+**An experimental minimalist interface for the TempoTec V1, built on Foxx's Sonix firmware.**
+
+MNML is a personal project inspired by the simplicity of Olauncher and the typography-driven interface of the original Microsoft Zune.
+
+The goal is simple: remove unnecessary visual elements and create a clean, distraction-free music player.
+
+## Features
+
+- Minimalist, text-based navigation
+- Large lowercase typography
+- Single-column menus without icons or cards
+- Customizable accent colors
+- Adaptive menu layout
+- Compatibility with existing Sonix themes
+
+## Development Status
+
+### MNML v1 — Working Prototype
+- Successfully compiled and installed on the TempoTec V1.
+- Basic minimalist home screen functional.
+
+### MNML v2 — In Development
+- Larger typography
+- Text-only submenus
+- Expanded accent color palette
+- Improved menu visibility handling
+
+### Future Ideas
+- Custom background colors
+- Subtle gradients
+- Optional wallpapers
+- Additional interface refinements
+
+## Credits & Acknowledgments
+
+**MNML is a UI modification of existing open-source firmware, not an independently developed music player.**
+
+Full credit for the original Sonix Player belongs to **Jepl4r** and its contributors.
+
+Special thanks to **Foxx (mr-f0xx)** for the TempoTec V1 firmware development, ongoing improvements, and the foundation that makes MNML possible.
+
+MNML focuses on visual customization while preserving the original Sonix functionality.
+
+This is a personal experimental project shared for learning and community collaboration. It is not affiliated with or endorsed by the original developers.
+
+**Original Projects:**
+- [Foxx — Sonix Player for TempoTec V1](https://github.com/mr-f0xx/sonix-player-tempotec-v1)
+- [Jepl4r — Sonix Player](https://github.com/Jepl4r/sonix-player)
+
+---
+
+## Original Firmware Documentation
+
+*Foxx's original README continues below, unchanged.*
+
+---
+
 ![Sonix Player for TempoTec Variations V1 cycling through the Tokyo Night, Amber on Black and OLED main menus](screenshots/readme-banner.gif)
 
 This repository is a community port of the original **[Sonix Player](https://github.com/Jepl4r/sonix-player)** project by **[Jepl4r](https://github.com/Jepl4r)** for the Tempotec Variations V1. 
