@@ -54,6 +54,11 @@ extern lv_font_t font_ui_24_bold;
 extern lv_font_t font_ui_26;
 extern lv_font_t font_ui_28;
 extern lv_font_t font_ui_32;
+// MNML-only true pixel sizes; other themes keep their original scaled fonts.
+extern lv_font_t font_mnml_home;
+extern lv_font_t font_mnml_nav;
+extern lv_font_t font_mnml_heading;
+extern lv_font_t font_mnml_row;
 // A bold face at a size that reads at a glance, because the regular weight
 // gets lost on the objects it is used for: the A and B letters on the Gearboy
 // buttons' 110 pixel circles, and the calculator's symbol keys -- the

@@ -315,8 +315,8 @@ static void gridpage_apply_theme_page(gridpage_theme_page_t *page) {
 					}
 					lower[n] = '\0';
 					lv_label_set_text(label, lower);
-					lv_obj_set_style_text_font(label, &font_ui_26, 0);
-					lv_obj_set_height(label, lv_font_get_line_height(&font_ui_26));
+					lv_obj_set_style_text_font(label, &font_mnml_nav, 0);
+					lv_obj_set_height(label, lv_font_get_line_height(&font_mnml_nav));
 					lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, 0);
 				} else {
 					lv_label_set_text(label, src);

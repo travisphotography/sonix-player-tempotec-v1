@@ -173,6 +173,10 @@ lv_font_t font_ui_24_bold;
 lv_font_t font_ui_26;
 lv_font_t font_ui_28;
 lv_font_t font_ui_32;
+lv_font_t font_mnml_home; // True 32px on the V1
+lv_font_t font_mnml_nav;  // True 26px on the V1
+lv_font_t font_mnml_heading; // True 28px on the V1
+lv_font_t font_mnml_row; // True 21px for settings navigation rows
 lv_font_t font_ui_36_bold;
 lv_font_t font_ui_64_bold;
 lv_font_t font_ui_72;
@@ -189,6 +193,10 @@ static const ui_font_t ui_fonts[] = {
 	{&font_ui_26, 26, false}, {&font_ui_28, 28, false}, {&font_ui_32, 32, false},
 	{&font_ui_72, 72, false}, {&font_ui_20_bold, 20, true}, {&font_ui_22_bold, 22, true}, {&font_ui_24_bold, 24, true}, {&font_ui_36_bold, 36, true},
 	{&font_ui_64_bold, 64, true},
+	{&font_mnml_home, 32, false},
+	{&font_mnml_nav, 26, false},
+	{&font_mnml_heading, 28, false},
+	{&font_mnml_row, 21, false},
 };
 
 #define UI_FONT_COUNT (sizeof(ui_fonts) / sizeof(ui_fonts[0]))
@@ -770,11 +778,11 @@ static void free_font_set(font_set_t *set) {
 static bool build_font_set(font_set_t *set, int setting, bool reuse_current) {
 	for (size_t i = 0; i < UI_FONT_COUNT; i++) {
 		const ui_font_t *ui = &ui_fonts[i];
-		int size = drawn_size(ui->size, setting);
+		int size = ((ui->font == &font_mnml_home || ui->font == &font_mnml_nav || ui->font == &font_mnml_heading || ui->font == &font_mnml_row) ? ui->size : drawn_size(ui->size, setting));
 		bool borrowed = false;
 		if (reuse_current) {
 			for (int other = 0; other < FONTS_TEXT_COUNT; other++) {
-				if (current_sets[other].built && drawn_size(ui->size, other) == size) {
+				if (current_sets[other].built && ((ui->font == &font_mnml_home || ui->font == &font_mnml_nav || ui->font == &font_mnml_heading || ui->font == &font_mnml_row) ? ui->size : drawn_size(ui->size, other)) == size) {
 					set->fonts[i] = current_sets[other].fonts[i];
 					borrowed = true;
 					break;

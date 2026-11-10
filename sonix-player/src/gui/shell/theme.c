@@ -249,31 +249,33 @@ static theme_palette_t *active = &palette_dark;
 // the blue and the purple -- and the two neutrals, brown and slate, at the
 // end. Blue (the default) comes first, then warm to cool: red, orange,
 // yellow, lime, green, cyan, indigo, purple, pink.
+// Twelve original accents followed by twelve solid, deeper counterparts.
+// Indices 0..11 stay unchanged to preserve existing saved preferences.
 static const lv_color_t ACCENT_COLORS[THEME_ACCENT_COUNT] = {
-	LV_COLOR_MAKE(53, 132, 228),  // blue (#3584e4, the default)
-	LV_COLOR_MAKE(224, 27, 36),   // red (#e01b24)
-	LV_COLOR_MAKE(255, 120, 0),   // orange (#ff7800)
-	LV_COLOR_MAKE(229, 165, 10),  // yellow (#e5a50a)
-	LV_COLOR_MAKE(153, 197, 0),   // lime (#99c500)
-	LV_COLOR_MAKE(46, 194, 126),  // green (#2ec27e)
-	LV_COLOR_MAKE(0, 176, 214),   // cyan (#00b0d6)
-	LV_COLOR_MAKE(102, 91, 224),  // indigo (#665be0)
-	LV_COLOR_MAKE(145, 65, 172),  // purple (#9141ac)
-	LV_COLOR_MAKE(213, 97, 153),  // pink (#d56199)
-	LV_COLOR_MAKE(168, 101, 48),  // brown (#a86530)
-	LV_COLOR_MAKE(139, 142, 148), // slate (#8b8e94)
-	LV_COLOR_MAKE(100, 81, 138),  // muted violet (#64518a)
-	LV_COLOR_MAKE(70, 128, 120),  // deep teal (#468078)
-	LV_COLOR_MAKE(77, 111, 140),  // steel blue (#4d6f8c)
-	LV_COLOR_MAKE(91, 143, 111),  // sage (#5b8f6f)
-	LV_COLOR_MAKE(169, 119, 110), // dusty rose (#a9776e)
-	LV_COLOR_MAKE(148, 124, 75),  // old gold (#947c4b)
-	LV_COLOR_MAKE(81, 109, 96),   // forest slate (#516d60)
-	LV_COLOR_MAKE(108, 95, 124),  // plum grey (#6c5f7c)
-	LV_COLOR_MAKE(90, 124, 140),  // blue-grey (#5a7c8c)
-	LV_COLOR_MAKE(143, 114, 138), // mauve (#8f728a)
-	LV_COLOR_MAKE(150, 113, 79),  // clay brown (#96714f)
-	LV_COLOR_MAKE(115, 132, 127), // mineral grey (#73847f)
+	LV_COLOR_MAKE(53, 132, 228), // blue #3584e4
+	LV_COLOR_MAKE(224, 27, 36), // red #e01b24
+	LV_COLOR_MAKE(255, 120, 0), // orange #ff7800
+	LV_COLOR_MAKE(229, 165, 10), // yellow #e5a50a
+	LV_COLOR_MAKE(153, 197, 0), // lime #99c500
+	LV_COLOR_MAKE(46, 194, 126), // green #2ec27e
+	LV_COLOR_MAKE(0, 176, 214), // cyan #00b0d6
+	LV_COLOR_MAKE(102, 91, 224), // indigo #665be0
+	LV_COLOR_MAKE(145, 65, 172), // purple #9141ac
+	LV_COLOR_MAKE(213, 97, 153), // pink #d56199
+	LV_COLOR_MAKE(168, 101, 48), // brown #a86530
+	LV_COLOR_MAKE(139, 142, 148), // slate #8b8e94
+	LV_COLOR_MAKE(33, 91, 169), // deep blue #215ba9
+	LV_COLOR_MAKE(164, 29, 43), // deep red #a41d2b
+	LV_COLOR_MAKE(182, 83, 9), // deep orange #b65309
+	LV_COLOR_MAKE(163, 111, 10), // deep yellow #a36f0a
+	LV_COLOR_MAKE(104, 144, 5), // deep lime #689005
+	LV_COLOR_MAKE(22, 135, 80), // deep green #168750
+	LV_COLOR_MAKE(6, 115, 148), // deep cyan #067394
+	LV_COLOR_MAKE(68, 57, 163), // deep indigo #4439a3
+	LV_COLOR_MAKE(104, 44, 136), // deep purple #682c88
+	LV_COLOR_MAKE(154, 54, 110), // deep pink #9a366e
+	LV_COLOR_MAKE(119, 65, 24), // deep brown #774118
+	LV_COLOR_MAKE(87, 95, 110), // deep slate #575f6e
 };
 static int accent_index;
 

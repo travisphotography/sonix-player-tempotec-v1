@@ -294,8 +294,8 @@ static void main_menu_style_mnml_tiles(void) {
 			lv_obj_set_style_shadow_width(tile, 0, 0);
 			lv_obj_set_width(label, lv_pct(100));
 			lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_LEFT, 0);
-			lv_obj_set_style_text_font(label, &font_ui_28, 0);
-			lv_obj_set_height(label, lv_font_get_line_height(&font_ui_28));
+			lv_obj_set_style_text_font(label, &font_mnml_home, 0);
+			lv_obj_set_height(label, lv_font_get_line_height(&font_mnml_home));
 		} else {
 			for (uint32_t j = 0; j + 1 < count; j++)
 				lv_obj_remove_flag(lv_obj_get_child(tile, j), LV_OBJ_FLAG_HIDDEN);

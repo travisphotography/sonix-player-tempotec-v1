@@ -185,7 +185,21 @@ int settingsrow_header_text_top(gui_config_t *cfg) {
 
 lv_obj_t *settingsrow_title(lv_obj_t *screen, gui_config_t *cfg, const char *text) {
 	lv_obj_t *label = lv_label_create(screen);
-	lv_label_set_text(label, tr(text));
+	// MNML_TRUE_FONT_HEADING: lowercase only in MNML, keep all other themes intact.
+	const char *heading = tr(text);
+	if (compact_rows() && theme_get_kind() == THEME_KIND_MNML) {
+		char lower[256];
+		size_t n = strlen(heading);
+		if (n >= sizeof(lower)) n = sizeof(lower) - 1;
+		for (size_t i = 0; i < n; i++) {
+			unsigned char c = (unsigned char)heading[i];
+			lower[i] = c >= 'A' && c <= 'Z' ? (char)(c + ('a' - 'A')) : (char)c;
+		}
+		lower[n] = '\0';
+		lv_label_set_text(label, lower);
+	} else {
+		lv_label_set_text(label, heading);
+	}
 	lv_obj_add_style(label, &theme_style_text, 0);
 	lv_obj_set_style_text_font(label, &font_ui_32, 0);
 	lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
@@ -280,6 +294,11 @@ static void fit_title(lv_obj_t *label, int width) {
 	// fit at 26 either, and an ellipsis in a page title tells the reader
 	// nothing.
 	static lv_font_t *const STEPS[] = {&font_ui_32, &font_ui_28, &font_ui_26, &font_ui_24};
+	static lv_font_t *const MNML_STEPS[] = {&font_mnml_heading, &font_mnml_nav, &font_ui_24};
+	bool mnml = compact_rows() && theme_get_kind() == THEME_KIND_MNML;
+	lv_font_t *const *steps = mnml ? MNML_STEPS : STEPS;
+	size_t step_count = mnml ? sizeof(MNML_STEPS) / sizeof(MNML_STEPS[0]) :
+					 sizeof(STEPS) / sizeof(STEPS[0]);
 
 	// The text must be sized with the ellipsis out of the way: a
 	// LV_LABEL_LONG_DOT label does not keep the original string, so once LVGL
@@ -295,12 +314,12 @@ static void fit_title(lv_obj_t *label, int width) {
 		return;
 	}
 
-	for (size_t i = 0; i < sizeof(STEPS) / sizeof(STEPS[0]); i++) {
+	for (size_t i = 0; i < step_count; i++) {
 		lv_point_t size;
-		lv_text_get_size(&size, text, STEPS[i], 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
-		if (size.x <= width || i + 1 == sizeof(STEPS) / sizeof(STEPS[0])) {
-			lv_obj_set_style_text_font(label, STEPS[i], 0);
-			lv_obj_set_height(label, lv_font_get_line_height(STEPS[i]));
+		lv_text_get_size(&size, text, steps[i], 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
+		if (size.x <= width || i + 1 == step_count) {
+			lv_obj_set_style_text_font(label, steps[i], 0);
+			lv_obj_set_height(label, lv_font_get_line_height(steps[i]));
 			break;
 		}
 	}
@@ -319,12 +338,15 @@ static void fit_row_label(lv_obj_t *label, int32_t width) {
 	// value (the Bluetooth adapter name) on the same line. The regular 24/22/20
 	// sequence can still be wider than the space left beside that value, so
 	// compact rows get smaller steps too. They are only used when needed.
+	// MNML_ROW_FONT: use a true pixel size for primary menu rows.
+	static lv_font_t *const MNML_STEPS[] = {&font_mnml_row, &font_ui_24, &font_ui_22, &font_ui_20, &font_ui_18, &font_ui_16, &font_ui_14};
 	static lv_font_t *const REGULAR_STEPS[] = {&font_ui_24, &font_ui_22, &font_ui_20};
 	static lv_font_t *const COMPACT_STEPS[] = {&font_ui_24, &font_ui_22, &font_ui_20, &font_ui_18, &font_ui_16,
 												  &font_ui_14};
-	lv_font_t *const *steps = compact_rows() ? COMPACT_STEPS : REGULAR_STEPS;
-	const size_t count = compact_rows() ? sizeof(COMPACT_STEPS) / sizeof(COMPACT_STEPS[0])
-												 : sizeof(REGULAR_STEPS) / sizeof(REGULAR_STEPS[0]);
+	bool mnml = compact_rows() && theme_get_kind() == THEME_KIND_MNML;
+	lv_font_t *const *steps = mnml ? MNML_STEPS : (compact_rows() ? COMPACT_STEPS : REGULAR_STEPS);
+	const size_t count = mnml ? sizeof(MNML_STEPS)/sizeof(MNML_STEPS[0]) :
+		(compact_rows() ? sizeof(COMPACT_STEPS)/sizeof(COMPACT_STEPS[0]) : sizeof(REGULAR_STEPS)/sizeof(REGULAR_STEPS[0]));
 
 	const char *text = lv_label_get_text(label);
 	if (!text || !text[0] || width <= 0) {
